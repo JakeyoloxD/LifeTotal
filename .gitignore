@@ -1,0 +1,32 @@
+﻿# React / Node
+node_modules/
+build/
+dist/
+package-lock.json
+
+# Environment files
+.env
+.env.*
+*.env
+
+# Logs and caches
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.cache/
+
+# OS and OneDrive junk
+.DS_Store
+Thumbs.db
+desktop.ini
+~$*
+*.tmp
+*.lnk
+
+# Editor settings
+.vscode/
+.idea/
+
+# Misc
+*.log

@@ -1,0 +1,60 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #000;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+.board {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+.player {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  border: 1px solid #333;
+}
+
+.player:nth-child(odd) {
+  background: linear-gradient(180deg, #1b1b1b 0%, #2a2a2a 100%);
+}
+
+.player:nth-child(even) {
+  background: linear-gradient(180deg, #2a2a2a 0%, #1b1b1b 100%);
+  transform: rotate(180deg);
+}
+
+.player h1 {
+  font-size: 8rem;
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+button {
+  font-size: 2rem;
+  padding: 10px 30px;
+  border: none;
+  border-radius: 10px;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+  user-select: none;
+}
+
+button:active {
+  background: #005fcc;
+}
