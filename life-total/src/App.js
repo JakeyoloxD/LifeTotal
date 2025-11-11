@@ -18,7 +18,10 @@ export default function App() {
   const resetGame = () => setGame(null);
 
   if (!game) return <PlayerSetup onStart={startGame} />;
-
+//  ／l、             
+//（ﾟ､ ｡ ７         
+//  l  ~ヽ       
+//  じしf_,)ノ
   return (
     <div className="board">
       <div className="header">
