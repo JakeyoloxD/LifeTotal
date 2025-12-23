@@ -163,17 +163,6 @@ function createPlayerCard(player) {
     const isInfectLethal = player.infect >= 8;
 
     card.innerHTML = `
-        <div class="player-header" style="background-color: ${player.color}">
-            <h3 onclick="editPlayerName(${player.id})" id="playerName${player.id}">${player.name}</h3>
-        </div>
-
-        <div class="life-display" id="lifeDisplay${player.id}">
-            <div class="tap-zone tap-left" id="tapLeft${player.id}"></div>
-            <div class="life-total">${player.life}</div>
-            <div class="tap-zone tap-right" id="tapRight${player.id}"></div>
-            ${isDead ? '<div class="status-overlay">DEAD</div>' : ''}
-        </div>
-
         <button class="commander-damage-btn ${isNearDeath ? 'warning' : ''}" onclick="openDamageModal(${player.id})">
             <div class="damage-compact">
                 ${player.commanderDamage.map((dmg, idx) => {
@@ -183,6 +172,17 @@ function createPlayerCard(player) {
                 ${player.infect > 0 ? `<span class="infect-badge ${isInfectLethal ? 'lethal' : ''}">☠️ ${player.infect}</span>` : ''}
             </div>
         </button>
+
+        <div class="life-display" id="lifeDisplay${player.id}">
+            <div class="tap-zone tap-left" id="tapLeft${player.id}"></div>
+            <div class="life-total">${player.life}</div>
+            <div class="tap-zone tap-right" id="tapRight${player.id}"></div>
+            ${isDead ? '<div class="status-overlay">DEAD</div>' : ''}
+        </div>
+
+        <div class="player-header" style="background-color: ${player.color}">
+            <h3 onclick="editPlayerName(${player.id})" id="playerName${player.id}">${player.name}</h3>
+        </div>
     `;
 
     // Set up tap/hold gestures after card is created
