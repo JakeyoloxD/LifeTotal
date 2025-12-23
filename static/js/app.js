@@ -86,51 +86,54 @@ function resetGame() {
 }
 
 function shouldPlayerRotate(playerId, numPlayers, isPortrait) {
-    // Rotate players on "opposite side" based on orientation
+    // Split screen in half along longest dimension
+    // Players in second half (right/bottom) rotate to face outward
+
+    // Determine grid dimensions based on player count and orientation
+    let cols, rows;
 
     if (numPlayers === 2) {
-        // Portrait: top player rotated (id 0)
-        // Landscape: left player rotated (id 0)
-        return playerId === 0;
-    }
-
-    if (numPlayers === 3) {
-        // Portrait: top player rotated (id 0)
-        // Landscape: left player rotated (id 0)
-        return playerId === 0;
-    }
-
-    if (numPlayers === 4) {
-        // Portrait: top row rotated (ids 0, 1)
-        // Landscape: left column rotated (ids 0, 2)
         if (isPortrait) {
-            return playerId < 2; // Top row
+            cols = 1; rows = 2;
         } else {
-            return playerId % 2 === 0; // Left column (0, 2)
+            cols = 2; rows = 1;
         }
-    }
-
-    if (numPlayers === 5) {
-        // Portrait: top 2 rows rotated (ids 0, 1, 2)
-        // Landscape: left column rotated (ids 0, 2, 4)
+    } else if (numPlayers === 3) {
         if (isPortrait) {
-            return playerId < 3; // Top 3 (2×3 grid, top 2 rows)
+            cols = 1; rows = 3;
         } else {
-            return playerId % 2 === 0; // Left column
+            cols = 3; rows = 1;
         }
-    }
-
-    if (numPlayers === 6) {
-        // Portrait: top half rotated (ids 0, 1, 2)
-        // Landscape: left half rotated (ids 0, 2, 4)
+    } else if (numPlayers === 4) {
+        cols = 2; rows = 2;
+    } else if (numPlayers === 5) {
         if (isPortrait) {
-            return playerId < 3; // Top half
+            cols = 2; rows = 3;
         } else {
-            return playerId % 2 === 0; // Left column
+            cols = 3; rows = 2;
         }
+    } else if (numPlayers === 6) {
+        if (isPortrait) {
+            cols = 2; rows = 3;
+        } else {
+            cols = 3; rows = 2;
+        }
+    } else {
+        return false;
     }
 
-    return false;
+    // Calculate grid position
+    const row = Math.floor(playerId / cols);
+    const col = playerId % cols;
+
+    // Rotate if in right half (landscape) or bottom half (portrait)
+    if (isPortrait) {
+        // Bottom half: row >= ceil(rows / 2)
+        return row >= Math.ceil(rows / 2);
+    } else {
+        // Right half: col >= ceil(cols / 2)
+        return col >= Math.ceil(cols / 2);
+    }
 }
 
 function renderPlayers() {
