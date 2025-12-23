@@ -301,6 +301,11 @@ body {
     pointer-events: none;
 }
 
+/* Counter-rotate life total so it's always readable */
+.life-total.counter-rotate {
+    transform: rotate(180deg);
+}
+
 .status-overlay {
     position: absolute;
     top: 0;
