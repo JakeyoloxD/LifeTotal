@@ -146,7 +146,7 @@ body {
     background: #27ae60;
 }
 
-/* Players Grid */
+/* Players Grid - Orientation Aware */
 .players-grid {
     flex: 1;
     display: grid;
@@ -155,28 +155,59 @@ body {
     overflow: hidden;
 }
 
-.players-grid.players-2 {
-    grid-template-columns: 1fr 1fr;
+/* 2 Players */
+.players-grid.players-2.portrait {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
 }
 
-.players-grid.players-3 {
+.players-grid.players-2.landscape {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+}
+
+/* 3 Players */
+.players-grid.players-3.portrait {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(3, 1fr);
+}
+
+.players-grid.players-3.landscape {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1fr;
+}
+
+/* 4 Players */
+.players-grid.players-4.portrait {
     grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: 1fr 1fr;
+    grid-template-rows: repeat(2, 1fr);
 }
 
-.players-grid.players-3 > :last-child {
-    grid-column: 1 / -1;
+.players-grid.players-4.landscape {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
 }
 
-.players-grid.players-4 {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-}
-
-.players-grid.players-5,
-.players-grid.players-6 {
+/* 5 Players */
+.players-grid.players-5.portrait {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(3, 1fr);
+}
+
+.players-grid.players-5.landscape {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+}
+
+/* 6 Players */
+.players-grid.players-6.portrait {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+}
+
+.players-grid.players-6.landscape {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
 }
 
 /* Player Card */

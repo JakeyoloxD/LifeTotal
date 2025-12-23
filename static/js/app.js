@@ -3,7 +3,8 @@ let gameState = {
     numPlayers: 4,
     startingLife: 40,
     players: [],
-    currentDamagePlayer: null
+    currentDamagePlayer: null,
+    isPortrait: window.innerHeight > window.innerWidth
 };
 
 const playerColors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
@@ -23,6 +24,17 @@ function initHoldState(playerId) {
         aggressiveThreshold: 2000
     };
 }
+
+// Detect orientation changes
+window.addEventListener('resize', () => {
+    const wasPortrait = gameState.isPortrait;
+    gameState.isPortrait = window.innerHeight > window.innerWidth;
+
+    // Re-render if orientation changed
+    if (wasPortrait !== gameState.isPortrait && gameState.players.length > 0) {
+        renderPlayers();
+    }
+});
 
 // Setup screen handlers
 document.addEventListener('DOMContentLoaded', () => {
@@ -72,19 +84,60 @@ function resetGame() {
     gameState.players = [];
 }
 
-function shouldPlayerRotate(playerId, numPlayers) {
-    // Rotate players on "opposite side" of table
-    if (numPlayers === 2) return playerId === 0; // Player 0 on left (rotated)
-    if (numPlayers === 3) return playerId === 0; // Top player rotated
-    if (numPlayers === 4) return playerId < 2; // Top row rotated
-    if (numPlayers === 5) return playerId < 2; // Top row rotated
-    if (numPlayers === 6) return playerId < 3; // Top row rotated
+function shouldPlayerRotate(playerId, numPlayers, isPortrait) {
+    // Rotate players on "opposite side" based on orientation
+
+    if (numPlayers === 2) {
+        // Portrait: top player rotated (id 0)
+        // Landscape: left player rotated (id 0)
+        return playerId === 0;
+    }
+
+    if (numPlayers === 3) {
+        // Portrait: top player rotated (id 0)
+        // Landscape: left player rotated (id 0)
+        return playerId === 0;
+    }
+
+    if (numPlayers === 4) {
+        // Portrait: top row rotated (ids 0, 1)
+        // Landscape: left column rotated (ids 0, 2)
+        if (isPortrait) {
+            return playerId < 2; // Top row
+        } else {
+            return playerId % 2 === 0; // Left column (0, 2)
+        }
+    }
+
+    if (numPlayers === 5) {
+        // Portrait: top 2 rows rotated (ids 0, 1, 2)
+        // Landscape: left column rotated (ids 0, 2, 4)
+        if (isPortrait) {
+            return playerId < 3; // Top 3 (2×3 grid, top 2 rows)
+        } else {
+            return playerId % 2 === 0; // Left column
+        }
+    }
+
+    if (numPlayers === 6) {
+        // Portrait: top half rotated (ids 0, 1, 2)
+        // Landscape: left half rotated (ids 0, 2, 4)
+        if (isPortrait) {
+            return playerId < 3; // Top half
+        } else {
+            return playerId % 2 === 0; // Left column
+        }
+    }
+
     return false;
 }
 
 function renderPlayers() {
     const grid = document.getElementById('playersGrid');
-    grid.className = `players-grid players-${gameState.numPlayers}`;
+    const isPortrait = gameState.isPortrait;
+
+    // Add orientation class to grid
+    grid.className = `players-grid players-${gameState.numPlayers} ${isPortrait ? 'portrait' : 'landscape'}`;
     grid.innerHTML = '';
 
     gameState.players.forEach(player => {
@@ -96,8 +149,8 @@ function renderPlayers() {
 function createPlayerCard(player) {
     const card = document.createElement('div');
 
-    // Determine rotation based on player position
-    const shouldRotate = shouldPlayerRotate(player.id, gameState.numPlayers);
+    // Determine rotation based on player position AND orientation
+    const shouldRotate = shouldPlayerRotate(player.id, gameState.numPlayers, gameState.isPortrait);
     card.className = `player-card ${player.life <= 0 ? 'dead' : ''} ${shouldRotate ? 'rotate-180' : ''}`;
     card.style.borderColor = player.color;
 
