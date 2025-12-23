@@ -30,3 +30,18 @@ desktop.ini
 
 # Misc
 *.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+ENV/
+.venv
+*.egg-info/
+
+# Old React project
+life-total/
