@@ -228,15 +228,41 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
     position: relative;
     background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+}
+
+.tap-zone {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.tap-left {
+    left: 0;
+}
+
+.tap-left:active {
+    background: rgba(231, 76, 60, 0.2);
+}
+
+.tap-right {
+    right: 0;
+}
+
+.tap-right:active {
+    background: rgba(46, 204, 113, 0.2);
 }
 
 .life-total {
     font-size: 5rem;
     font-weight: 900;
     text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+    z-index: 0;
+    pointer-events: none;
 }
 
 .status-overlay {
@@ -252,52 +278,8 @@ body {
     font-size: 3rem;
     font-weight: 900;
     letter-spacing: 4px;
-}
-
-.life-controls,
-.life-controls-large {
-    display: flex;
-    gap: 4px;
-    padding: 4px;
-}
-
-.life-btn,
-.life-btn-large {
-    flex: 1;
-    padding: 12px;
-    font-size: 1.2rem;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s;
-    color: white;
-}
-
-.life-btn-large {
-    padding: 16px;
-    font-size: 1.5rem;
-}
-
-.life-minus,
-.life-minus-large {
-    background: #e74c3c;
-}
-
-.life-minus:active,
-.life-minus-large:active {
-    background: #c0392b;
-    transform: scale(0.95);
-}
-
-.life-plus,
-.life-plus-large {
-    background: #2ecc71;
-}
-
-.life-plus:active,
-.life-plus-large:active {
-    background: #27ae60;
-    transform: scale(0.95);
+    z-index: 2;
+    pointer-events: none;
 }
 
 .commander-damage-btn {

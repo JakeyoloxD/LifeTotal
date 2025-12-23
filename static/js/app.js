@@ -8,6 +8,22 @@ let gameState = {
 
 const playerColors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
 
+// Hold gesture state for each player
+const holdState = {};
+
+function initHoldState(playerId) {
+    holdState[playerId] = {
+        interval: null,
+        timeout: null,
+        stepTimeout: null,
+        speed: 150,
+        step: 1,
+        isAggressive: false,
+        holdDuration: 200,
+        aggressiveThreshold: 2000
+    };
+}
+
 // Setup screen handlers
 document.addEventListener('DOMContentLoaded', () => {
     // Player count buttons
@@ -81,19 +97,11 @@ function createPlayerCard(player) {
             <h3 onclick="editPlayerName(${player.id})" id="playerName${player.id}">${player.name}</h3>
         </div>
 
-        <div class="life-display" onclick="changeLife(${player.id}, 1)">
+        <div class="life-display" id="lifeDisplay${player.id}">
+            <div class="tap-zone tap-left" id="tapLeft${player.id}"></div>
             <div class="life-total">${player.life}</div>
+            <div class="tap-zone tap-right" id="tapRight${player.id}"></div>
             ${isDead ? '<div class="status-overlay">DEAD</div>' : ''}
-        </div>
-
-        <div class="life-controls">
-            <button class="life-btn life-minus" onclick="event.stopPropagation(); changeLife(${player.id}, -1)">-1</button>
-            <button class="life-btn life-plus" onclick="event.stopPropagation(); changeLife(${player.id}, 1)">+1</button>
-        </div>
-
-        <div class="life-controls-large">
-            <button class="life-btn-large life-minus-large" onclick="event.stopPropagation(); changeLife(${player.id}, -5)">-5</button>
-            <button class="life-btn-large life-plus-large" onclick="event.stopPropagation(); changeLife(${player.id}, 5)">+5</button>
         </div>
 
         <button class="commander-damage-btn ${isNearDeath ? 'warning' : ''}" onclick="openDamageModal(${player.id})">
@@ -105,12 +113,163 @@ function createPlayerCard(player) {
         </button>
     `;
 
+    // Set up tap/hold gestures after card is created
+    setTimeout(() => setupTapHold(player.id), 0);
+
     return card;
+}
+
+function setupTapHold(playerId) {
+    initHoldState(playerId);
+
+    const leftZone = document.getElementById(`tapLeft${playerId}`);
+    const rightZone = document.getElementById(`tapRight${playerId}`);
+
+    if (!leftZone || !rightZone) return;
+
+    // LEFT ZONE - Decrease life
+    leftZone.addEventListener('click', (e) => {
+        e.stopPropagation();
+        changeLife(playerId, -1);
+    });
+
+    leftZone.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        startHold(playerId, -1);
+    });
+
+    leftZone.addEventListener('mouseup', (e) => {
+        e.stopPropagation();
+        stopHold(playerId);
+    });
+
+    leftZone.addEventListener('mouseleave', (e) => {
+        stopHold(playerId);
+    });
+
+    leftZone.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        startHold(playerId, -1);
+    });
+
+    leftZone.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        stopHold(playerId);
+    });
+
+    // RIGHT ZONE - Increase life
+    rightZone.addEventListener('click', (e) => {
+        e.stopPropagation();
+        changeLife(playerId, 1);
+    });
+
+    rightZone.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        startHold(playerId, 1);
+    });
+
+    rightZone.addEventListener('mouseup', (e) => {
+        e.stopPropagation();
+        stopHold(playerId);
+    });
+
+    rightZone.addEventListener('mouseleave', (e) => {
+        stopHold(playerId);
+    });
+
+    rightZone.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        startHold(playerId, 1);
+    });
+
+    rightZone.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        stopHold(playerId);
+    });
+}
+
+function startHold(playerId, direction) {
+    const state = holdState[playerId];
+
+    state.timeout = setTimeout(() => {
+        const incrementFunc = () => {
+            changeLife(playerId, direction * state.step);
+
+            // Accelerate speed
+            if (!state.isAggressive) {
+                state.speed = Math.max(state.speed / 1.2, 50);
+            } else {
+                state.speed = Math.max(state.speed / 1.1, 5);
+            }
+
+            const player = gameState.players[playerId];
+            if (player && player.life > 100) {
+                state.speed = Math.max(state.speed / 1.05, 1);
+            }
+
+            // Restart interval with new speed
+            clearInterval(state.interval);
+            state.interval = setInterval(incrementFunc, state.speed);
+        };
+
+        state.interval = setInterval(incrementFunc, state.speed);
+
+        // Enter aggressive mode after threshold
+        setTimeout(() => {
+            state.isAggressive = true;
+        }, state.aggressiveThreshold);
+
+        // Increase step size over time
+        setTimeout(() => { state.step = 10; }, 20000);
+        setTimeout(() => { state.step = 100; }, 60000);
+        setTimeout(() => { state.step = 1000; }, 120000);
+
+    }, state.holdDuration);
+}
+
+function stopHold(playerId) {
+    const state = holdState[playerId];
+
+    clearTimeout(state.timeout);
+    clearInterval(state.interval);
+    clearTimeout(state.stepTimeout);
+
+    state.speed = 150;
+    state.step = 1;
+    state.isAggressive = false;
 }
 
 function changeLife(playerId, amount) {
     gameState.players[playerId].life += amount;
-    renderPlayers();
+
+    // Update just the life total instead of re-rendering everything
+    const lifeTotal = document.querySelector(`#lifeDisplay${playerId} .life-total`);
+    if (lifeTotal) {
+        lifeTotal.textContent = gameState.players[playerId].life;
+    }
+
+    // Check if player is dead
+    const lifeDisplay = document.getElementById(`lifeDisplay${playerId}`);
+    const playerCard = lifeDisplay?.closest('.player-card');
+    if (playerCard) {
+        if (gameState.players[playerId].life <= 0) {
+            playerCard.classList.add('dead');
+            if (!lifeDisplay.querySelector('.status-overlay')) {
+                const overlay = document.createElement('div');
+                overlay.className = 'status-overlay';
+                overlay.textContent = 'DEAD';
+                lifeDisplay.appendChild(overlay);
+            }
+        } else {
+            playerCard.classList.remove('dead');
+            const overlay = lifeDisplay.querySelector('.status-overlay');
+            if (overlay) overlay.remove();
+        }
+    }
 }
 
 function editPlayerName(playerId) {
