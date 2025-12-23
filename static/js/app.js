@@ -32,6 +32,7 @@ window.addEventListener('resize', () => {
 
     // Re-render if orientation changed
     if (wasPortrait !== gameState.isPortrait && gameState.players.length > 0) {
+        console.log(`Orientation changed: ${gameState.isPortrait ? 'PORTRAIT' : 'LANDSCAPE'}`);
         renderPlayers();
     }
 });
@@ -137,7 +138,9 @@ function renderPlayers() {
     const isPortrait = gameState.isPortrait;
 
     // Add orientation class to grid
-    grid.className = `players-grid players-${gameState.numPlayers} ${isPortrait ? 'portrait' : 'landscape'}`;
+    const gridClass = `players-grid players-${gameState.numPlayers} ${isPortrait ? 'portrait' : 'landscape'}`;
+    grid.className = gridClass;
+    console.log(`Grid class: ${gridClass}`);
     grid.innerHTML = '';
 
     gameState.players.forEach(player => {
