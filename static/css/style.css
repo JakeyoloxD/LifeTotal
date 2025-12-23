@@ -192,6 +192,11 @@ body {
     transition: all 0.3s;
 }
 
+/* Rotation for opposite players */
+.player-card.rotate-180 {
+    transform: rotate(180deg);
+}
+
 .player-card.dead {
     opacity: 0.5;
     filter: grayscale(1);
@@ -284,13 +289,14 @@ body {
 
 .commander-damage-btn {
     width: 100%;
-    padding: 12px;
+    padding: 8px;
     background: #34495e;
     border: none;
     color: white;
     cursor: pointer;
     transition: all 0.2s;
     border-top: 2px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.75rem;
 }
 
 .commander-damage-btn:active {
@@ -299,6 +305,30 @@ body {
 
 .commander-damage-btn.warning {
     background: #e67e22;
+    animation: pulse 1.5s infinite;
+}
+
+.damage-compact {
+    display: flex;
+    justify-content: space-around;
+    gap: 8px;
+}
+
+.damage-compact span {
+    font-weight: 600;
+}
+
+.infect-badge {
+    display: inline-block;
+    background: #9b59b6;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.infect-badge.lethal {
+    background: #8e44ad;
     animation: pulse 1.5s infinite;
 }
 
