@@ -54,7 +54,8 @@ function startGame() {
             name: `Player ${i + 1}`,
             life: gameState.startingLife,
             color: playerColors[i],
-            commanderDamage: Array(gameState.numPlayers).fill(0)
+            commanderDamage: Array(gameState.numPlayers).fill(0),
+            infect: 0 // Poison counters (10 = death)
         });
     }
 
@@ -71,6 +72,16 @@ function resetGame() {
     gameState.players = [];
 }
 
+function shouldPlayerRotate(playerId, numPlayers) {
+    // Rotate players on "opposite side" of table
+    if (numPlayers === 2) return playerId === 0; // Player 0 on left (rotated)
+    if (numPlayers === 3) return playerId === 0; // Top player rotated
+    if (numPlayers === 4) return playerId < 2; // Top row rotated
+    if (numPlayers === 5) return playerId < 2; // Top row rotated
+    if (numPlayers === 6) return playerId < 3; // Top row rotated
+    return false;
+}
+
 function renderPlayers() {
     const grid = document.getElementById('playersGrid');
     grid.className = `players-grid players-${gameState.numPlayers}`;
@@ -84,13 +95,16 @@ function renderPlayers() {
 
 function createPlayerCard(player) {
     const card = document.createElement('div');
-    card.className = `player-card ${player.life <= 0 ? 'dead' : ''}`;
+
+    // Determine rotation based on player position
+    const shouldRotate = shouldPlayerRotate(player.id, gameState.numPlayers);
+    card.className = `player-card ${player.life <= 0 ? 'dead' : ''} ${shouldRotate ? 'rotate-180' : ''}`;
     card.style.borderColor = player.color;
 
-    const isDead = player.life <= 0;
-    const totalDamage = player.commanderDamage.reduce((sum, dmg) => sum + dmg, 0);
+    const isDead = player.life <= 0 || player.infect >= 10;
     const maxDamage = Math.max(...player.commanderDamage);
     const isNearDeath = maxDamage >= 18;
+    const isInfectLethal = player.infect >= 8;
 
     card.innerHTML = `
         <div class="player-header" style="background-color: ${player.color}">
@@ -105,10 +119,12 @@ function createPlayerCard(player) {
         </div>
 
         <button class="commander-damage-btn ${isNearDeath ? 'warning' : ''}" onclick="openDamageModal(${player.id})">
-            <div class="damage-label">Commander Damage</div>
-            <div class="damage-stats">
-                <span>Total: ${totalDamage}</span>
-                <span class="${isNearDeath ? 'max-warning' : ''}">Max: ${maxDamage}/21</span>
+            <div class="damage-compact">
+                ${player.commanderDamage.map((dmg, idx) => {
+                    if (idx === player.id) return '';
+                    return dmg > 0 ? `<span class="${dmg >= 18 ? 'max-warning' : ''}">${dmg}</span>` : '';
+                }).filter(x => x).join('') || '<span>⚔️</span>'}
+                ${player.infect > 0 ? `<span class="infect-badge ${isInfectLethal ? 'lethal' : ''}">☠️ ${player.infect}</span>` : ''}
             </div>
         </button>
     `;
@@ -252,11 +268,14 @@ function changeLife(playerId, amount) {
         lifeTotal.textContent = gameState.players[playerId].life;
     }
 
-    // Check if player is dead
+    // Check if player is dead (life <= 0 OR infect >= 10)
     const lifeDisplay = document.getElementById(`lifeDisplay${playerId}`);
     const playerCard = lifeDisplay?.closest('.player-card');
     if (playerCard) {
-        if (gameState.players[playerId].life <= 0) {
+        const player = gameState.players[playerId];
+        const isDead = player.life <= 0 || player.infect >= 10;
+
+        if (isDead) {
             playerCard.classList.add('dead');
             if (!lifeDisplay.querySelector('.status-overlay')) {
                 const overlay = document.createElement('div');
@@ -305,11 +324,31 @@ function openDamageModal(playerId) {
     gameState.currentDamagePlayer = playerId;
     const player = gameState.players[playerId];
 
-    document.getElementById('modalTitle').textContent = `Commander Damage to ${player.name}`;
+    document.getElementById('modalTitle').textContent = `${player.name}`;
 
     const damageGrid = document.getElementById('damageGrid');
     damageGrid.innerHTML = '';
 
+    // Infect/Poison counters
+    const infectLethal = player.infect >= 10;
+    const infectRow = document.createElement('div');
+    infectRow.className = 'damage-row';
+    infectRow.innerHTML = `
+        <div class="opponent-name" style="background-color: #9b59b6">
+            ☠️ Infect
+        </div>
+        <div class="damage-controls">
+            <button class="damage-btn damage-minus" onclick="changeInfect(${playerId}, -1)">-</button>
+            <div class="damage-value ${infectLethal ? 'lethal' : ''}">
+                ${player.infect}
+                ${infectLethal ? '<span class="lethal-badge">LETHAL</span>' : ''}
+            </div>
+            <button class="damage-btn damage-plus" onclick="changeInfect(${playerId}, 1)">+</button>
+        </div>
+    `;
+    damageGrid.appendChild(infectRow);
+
+    // Commander damage from each opponent
     gameState.players.forEach(opponent => {
         if (opponent.id === playerId) return;
 
@@ -343,6 +382,14 @@ function closeDamageModal(event) {
         document.getElementById('damageModal').style.display = 'none';
         gameState.currentDamagePlayer = null;
     }
+}
+
+function changeInfect(playerId, amount) {
+    gameState.players[playerId].infect = Math.max(0, Math.min(20, gameState.players[playerId].infect + amount));
+
+    // Re-render the modal and the player cards
+    openDamageModal(playerId);
+    renderPlayers();
 }
 
 function changeCommanderDamage(receiverId, dealerId, amount) {
