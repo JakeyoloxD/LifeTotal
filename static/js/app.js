@@ -1,10 +1,19 @@
+// Orientation detection with threshold to prevent flipping on near-square screens
+function detectOrientation() {
+    const ratio = window.innerWidth / window.innerHeight;
+    // Portrait if width is significantly less than height (ratio < 0.95)
+    // Landscape if width is close to or greater than height (ratio >= 0.95)
+    // This 5% threshold prevents flickering on nearly-square screens
+    return ratio < 0.95;
+}
+
 // Game state
 let gameState = {
     numPlayers: 4,
     startingLife: 40,
     players: [],
     currentDamagePlayer: null,
-    isPortrait: window.innerHeight > window.innerWidth
+    isPortrait: detectOrientation()
 };
 
 const playerColors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
@@ -25,14 +34,15 @@ function initHoldState(playerId) {
     };
 }
 
-// Detect orientation changes
+// Detect orientation changes with threshold
 window.addEventListener('resize', () => {
     const wasPortrait = gameState.isPortrait;
-    gameState.isPortrait = window.innerHeight > window.innerWidth;
+    gameState.isPortrait = detectOrientation();
 
     // Re-render if orientation changed
     if (wasPortrait !== gameState.isPortrait && gameState.players.length > 0) {
-        console.log(`Orientation changed: ${gameState.isPortrait ? 'PORTRAIT' : 'LANDSCAPE'}`);
+        const ratio = (window.innerWidth / window.innerHeight).toFixed(2);
+        console.log(`Orientation changed: ${gameState.isPortrait ? 'PORTRAIT' : 'LANDSCAPE'} (ratio: ${ratio})`);
         renderPlayers();
     }
 });
