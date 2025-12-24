@@ -228,6 +228,15 @@ body {
     transform: rotate(180deg);
 }
 
+.player-card.rotate-90 {
+    transform: rotate(90deg);
+}
+ 
+.player-card.rotate-270 {
+    transform: rotate(270deg);
+}
+
+
 .player-card.dead {
     opacity: 0.5;
     filter: grayscale(1);

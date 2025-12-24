@@ -95,13 +95,13 @@ function resetGame() {
     gameState.players = [];
 }
 
-function shouldPlayerRotate(playerId, numPlayers, isPortrait) {
+function getPlayerRotation(playerId, numPlayers, isPortrait) {
     // Split screen in half along longest dimension
-    // Players in second half (right/bottom) rotate to face outward
-
+    // Return rotation class based on player position and orientation
+ 
     // Determine grid dimensions based on player count and orientation
     let cols, rows;
-
+ 
     if (numPlayers === 2) {
         if (isPortrait) {
             cols = 1; rows = 2;
@@ -129,21 +129,21 @@ function shouldPlayerRotate(playerId, numPlayers, isPortrait) {
             cols = 3; rows = 2;
         }
     } else {
-        return false;
+        return '';
     }
-
+ 
     // Calculate grid position
     const row = Math.floor(playerId / cols);
     const col = playerId % cols;
-
-    // Rotate first half (top in portrait, left in landscape)
-    // Players sit at short edges - they physically rotate device in landscape
+ 
     if (isPortrait) {
-        // Top half rotates (players at top edge need content upside-down)
-        return row < Math.ceil(rows / 2);
+        // Portrait: top half rotates 180°, bottom half stays at 0°
+        const isTopHalf = row < Math.ceil(rows / 2);
+        return isTopHalf ? 'rotate-180' : '';
     } else {
-        // Left half rotates (players physically rotate phone, sit at left edge)
-        return col < Math.ceil(cols / 2);
+        // Landscape: left half rotates 90°, right half rotates 270°
+        const isLeftHalf = col < Math.ceil(cols / 2);
+        return isLeftHalf ? 'rotate-90' : 'rotate-270';
     }
 }
 
@@ -167,8 +167,8 @@ function createPlayerCard(player) {
     const card = document.createElement('div');
 
     // Determine rotation based on player position AND orientation
-    const shouldRotate = shouldPlayerRotate(player.id, gameState.numPlayers, gameState.isPortrait);
-    card.className = `player-card ${player.life <= 0 ? 'dead' : ''} ${shouldRotate ? 'rotate-180' : ''}`;
+    const rotationClass = getPlayerRotation(player.id, gameState.numPlayers, gameState.isPortrait);
+    card.className = `player-card ${player.life <= 0 ? 'dead' : ''} ${rotationClass}`;
     card.style.borderColor = player.color;
 
     const isDead = player.life <= 0 || player.infect >= 10;
