@@ -173,7 +173,7 @@ function createPlayerCard(player) {
 
         <div class="life-display" id="lifeDisplay${player.id}">
             <div class="tap-zone tap-left" id="tapLeft${player.id}"></div>
-            <div class="life-total ${shouldRotate ? 'counter-rotate' : ''}">${player.life}</div>
+            <div class="life-total">${player.life}</div>
             <div class="tap-zone tap-right" id="tapRight${player.id}"></div>
             ${isDead ? '<div class="status-overlay">DEAD</div>' : ''}
         </div>
