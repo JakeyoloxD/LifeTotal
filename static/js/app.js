@@ -126,13 +126,14 @@ function shouldPlayerRotate(playerId, numPlayers, isPortrait) {
     const row = Math.floor(playerId / cols);
     const col = playerId % cols;
 
-    // Rotate if in right half (landscape) or bottom half (portrait)
+    // Rotate first half (top in portrait, left in landscape)
+    // Players sit at short edges - they physically rotate device in landscape
     if (isPortrait) {
-        // Bottom half: row >= ceil(rows / 2)
-        return row >= Math.ceil(rows / 2);
+        // Top half rotates (players at top edge need content upside-down)
+        return row < Math.ceil(rows / 2);
     } else {
-        // Right half: col >= ceil(cols / 2)
-        return col >= Math.ceil(cols / 2);
+        // Left half rotates (players physically rotate phone, sit at left edge)
+        return col < Math.ceil(cols / 2);
     }
 }
 
